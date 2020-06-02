@@ -1,0 +1,17 @@
+DebugConfig
+*Listings
+*.tmp
+*.a
+*.o
+*.d
+*.crf
+*.lnk
+*.map
+*Objects
+!*/Objects/*.hex
+*.dep
+*.log
+*.axf
+*.TMP
+*.uvoptx
+*.uvguix.*
