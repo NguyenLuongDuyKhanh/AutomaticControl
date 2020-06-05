@@ -20,6 +20,6 @@
 #define I2C_TIMEOUT 						100000
 
 void BH1750_Init(void);
-float BH1750_ReadLux (void);
+int BH1750_ReadLux (void);
 
 #endif

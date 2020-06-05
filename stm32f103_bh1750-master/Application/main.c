@@ -1,14 +1,12 @@
-
 #include "defines.h"
 #include "hw_config.h"
 #include "usb_lib.h"
 #include "usb_desc.h"
 #include "usb_pwr.h"
 
+/* -------------------------- VARIABLES -------------------------- */
 RCC_ClocksTypeDef RCC_Clock;
-
-float lux;
-
+int lux;
 extern __IO uint8_t Receive_Buffer[64];
 extern __IO  uint32_t Receive_length ;
 extern __IO  uint32_t length ;
@@ -16,15 +14,56 @@ uint8_t Send_Buffer[64];
 uint32_t packet_sent=1;
 uint32_t packet_receive=1;
 
+/* -------------------------- FUNCTIONS -------------------------- */
+void init_CLK(void);
+void init_TIM(void);
+char *sendInt(int data);
 
 int main(void)
+{
+	init_CLK();
+	init_TIM();
+	//BH1750_Init();
+	/*0->9999*/
+	
+	
+	int testint = 3456;
+	
+	unsigned char digit1, digit2, digit3, digit4;
+	while(1)
+	{	
+		//digit1 = (char) ((testint % 10) & 0xff);
+			//TIM_SetCompare4(TIM4, i);
+		
+		//lux = BH1750_ReadLux();
+		if (bDeviceState == CONFIGURED)
+    {
+      CDC_Receive_DATA();
+      /*Check to see if we have data yet */
+      if (Receive_length  != 0)
+      {
+        if (packet_sent == 1)
+          CDC_Send_DATA((unsigned char*)Receive_Buffer,Receive_length);
+        Receive_length = 0;
+      }
+    }
+		
+		//CDC_Send_DATA((unsigned char*)"abc",Receive_length);
+		// delay
+	}
+}
+
+void init_CLK(void)
 {
 	RCC_GetClocksFreq(&RCC_Clock);
 	Set_System();
   Set_USBClock();
   USB_Interrupts_Config();
   USB_Init();
-	
+}
+
+void init_TIM(void)
+{
 	GPIO_InitTypeDef	GPIO_InitStructure;
 	TIM_TimeBaseInitTypeDef	TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef		TIM_OCInitStructure;
@@ -53,30 +92,7 @@ int main(void)
 	TIM_OC4PreloadConfig(TIM4, TIM_OCPreload_Enable);
 	TIM_ARRPreloadConfig(TIM4, ENABLE);
 	TIM_Cmd(TIM4,ENABLE);
-	
-	/*0->9999*/
-	TIM_SetCompare4(TIM4,500);
-	BH1750_Init();
-	
-	while(1)
-	{
-
-		//TIM_SetCompare4(TIM4,500);
-		
-//		lux = BH1750_ReadLux();
-//		if (bDeviceState == CONFIGURED)
-//    {
-//      CDC_Receive_DATA();
-//      /*Check to see if we have data yet */
-//      if (Receive_length  != 0)
-//      {
-//        if (packet_sent == 1)
-//          CDC_Send_DATA ((unsigned char*)Receive_Buffer,Receive_length);
-//        Receive_length = 0;
-//      }
-//    }
-//		// delay
-//		for(int i = 0; i< 1000000; i++);
-	}
+	// turn off LED
+	TIM_SetCompare4(TIM4, 9998);
 }
 
