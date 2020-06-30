@@ -13,46 +13,80 @@ extern __IO  uint32_t length ;
 uint8_t Send_Buffer[64];
 uint32_t packet_sent=1;
 uint32_t packet_receive=1;
+/*
+double Kp = 0.5 ; //0.5; 40        is ok +1 , +0.4 -0.3 ,10cm 
+double Ki = 0.005;  //0.001; 85;
+double Kd = 0.001; // 0.0025; 160
+*/
 
+double Kp = 0.5 ; //0.5; 40        is ok +1 , +0.4 -0.3 ,10cm 
+double Ki = 0.005;  //0.001; 85;
+double Kd = 0.001; // 0.0025; 160
+
+double P_part,I_part,D_part,Out;
+double Val_Out, Error, pre_Error = 0;
+	
 /* -------------------------- FUNCTIONS -------------------------- */
 void init_CLK(void);
 void init_TIM(void);
 char *sendInt(int data);
+int PID(int actual, int expect);
 
 int main(void)
 {
 	init_CLK();
 	init_TIM();
-	//BH1750_Init();
+	BH1750_Init();
 	/*0->9999*/
+	/*sang->tat*/
 	
-	
-	int testint = 3456;
-	
-	unsigned char digit1, digit2, digit3, digit4;
+	int testint = 0;
+	int i =0;
 	while(1)
-	{	
-		//digit1 = (char) ((testint % 10) & 0xff);
-			//TIM_SetCompare4(TIM4, i);
+	{
+		//CDC_Send_DATA((unsigned char*)"h",1);
+		testint = PID(lux,1000);
+		TIM_SetCompare4(TIM4, (9999-testint));
+		//TIM_SetCompare4(TIM4, 9990);
+		//CDC_Send_DATA((unsigned char*)(testint/4),1);
+		//CDC_Send_DATA((unsigned char*)"hello",5);
+		lux = BH1750_ReadLux();
+		/*
+		CDC_Send_DATA((unsigned char*)"a",1);
+		i=10000;
+		while(i--);
+		i=10000;
+		while(i--);
 		
-		//lux = BH1750_ReadLux();
-		if (bDeviceState == CONFIGURED)
-    {
-      CDC_Receive_DATA();
-      /*Check to see if we have data yet */
-      if (Receive_length  != 0)
-      {
-        if (packet_sent == 1)
-          CDC_Send_DATA((unsigned char*)Receive_Buffer,Receive_length);
-        Receive_length = 0;
-      }
-    }
-		
+		*/
+//		if (bDeviceState == CONFIGURED)
+//    {
+//      CDC_Receive_DATA();
+//      /*Check to see if we have data yet */
+//      if (Receive_length  != 0)
+//      {
+//        if (packet_sent == 1)
+//          CDC_Send_DATA((unsigned char*)Receive_Buffer,Receive_length);
+//        Receive_length = 0;
+//      }
+//    }
+//		
 		//CDC_Send_DATA((unsigned char*)"abc",Receive_length);
 		// delay
 	}
 }
-
+int PID(int actual, int expect)
+{
+ 
+	
+	Error = expect - actual;
+	P_part = Kp*Error;
+	I_part += (Ki*Error);
+	D_part = Kd*( Error - pre_Error );
+	Val_Out += (P_part + I_part + D_part);  // OUTPUT
+  pre_Error = Error;
+	return Val_Out;
+}
 void init_CLK(void)
 {
 	RCC_GetClocksFreq(&RCC_Clock);
