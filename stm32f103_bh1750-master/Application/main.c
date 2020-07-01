@@ -13,11 +13,6 @@ extern __IO  uint32_t length ;
 uint8_t Send_Buffer[64];
 uint32_t packet_sent=1;
 uint32_t packet_receive=1;
-/*
-double Kp = 0.5 ; //0.5; 40        is ok +1 , +0.4 -0.3 ,10cm 
-double Ki = 0.005;  //0.001; 85;
-double Kd = 0.001; // 0.0025; 160
-*/
 
 double Kp = 0.5 ; //0.5; 40        is ok +1 , +0.4 -0.3 ,10cm 
 double Ki = 0.005;  //0.001; 85;
@@ -44,35 +39,17 @@ int main(void)
 	int i =0;
 	while(1)
 	{
-		//CDC_Send_DATA((unsigned char*)"h",1);
-		testint = PID(lux,1000);
-		TIM_SetCompare4(TIM4, (9999-testint));
-		//TIM_SetCompare4(TIM4, 9990);
-		//CDC_Send_DATA((unsigned char*)(testint/4),1);
-		//CDC_Send_DATA((unsigned char*)"hello",5);
 		lux = BH1750_ReadLux();
-		/*
-		CDC_Send_DATA((unsigned char*)"a",1);
-		i=10000;
-		while(i--);
-		i=10000;
-		while(i--);
+		testint = PID(lux,1000);
+		if (testint >= 9999)
+		{
+			testint = 9999;
+		}else if(testint <= 0)
+		{
+			testint = 0;
+		}
+		TIM_SetCompare4(TIM4, (9999-testint));
 		
-		*/
-//		if (bDeviceState == CONFIGURED)
-//    {
-//      CDC_Receive_DATA();
-//      /*Check to see if we have data yet */
-//      if (Receive_length  != 0)
-//      {
-//        if (packet_sent == 1)
-//          CDC_Send_DATA((unsigned char*)Receive_Buffer,Receive_length);
-//        Receive_length = 0;
-//      }
-//    }
-//		
-		//CDC_Send_DATA((unsigned char*)"abc",Receive_length);
-		// delay
 	}
 }
 int PID(int actual, int expect)
